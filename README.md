@@ -17,7 +17,7 @@ It only reads the emulator's memory. It never writes anything into the game or t
 
 ## Getting it
 
-1. Download `Outbreak Field Guide.zip` from the [latest release](../../releases/latest).
+1. Download the zip (`Outbreak.Field.Guide.zip`) from the [latest release](../../releases/latest).
 2. Extract it anywhere.
 3. Double-click `Outbreak Field Guide.exe`. Your browser opens on the guide.
 4. Start PCSX2 and load Outbreak, before or after. The guide picks the game up within a few seconds.
