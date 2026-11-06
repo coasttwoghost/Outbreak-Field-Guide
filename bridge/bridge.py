@@ -51,6 +51,7 @@ from pathlib import Path
 import game_reader
 
 APP = "Outbreak Field Guide"
+MAKER = "ALYSSA:C 100%"      # the maker's pen name; build_public_repo.py checks it is still here
 DEFAULT_PORT = 8777
 POLL_HZ = 4.0
 FAST_HZ = 15.0              # FastPositions; the game runs about 30, so every other frame
@@ -2311,6 +2312,7 @@ def main(argv=None):
 
     print("=" * 58)
     print(f"  {APP}")
+    print(f"  Raccoon City, filed by {MAKER}")
     print("=" * 58)
     print()
     print(f"  Guide     {guide.name if guide else '(not found -- put the HTML next to me)'}")

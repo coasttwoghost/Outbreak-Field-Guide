@@ -58,6 +58,8 @@ Python 3.10 or newer, standard library only. `py bridge/package.py` builds the z
 
 ## Credits
 
+Field guide and bridge filed by ALYSSA:C 100%.
+
 The memory layout this reads was first mapped by the Outbreak Tracker project (Fothsid, killme, phoe-nix and madgamer98), whose tracker made live tools for this game possible. This project does not include or use their code or binaries. Room names, item data and enemy data come from the game discs and the Outbreak community's research.
 
 Resident Evil is a trademark of Capcom. This is a fan project, not affiliated with or endorsed by Capcom.
