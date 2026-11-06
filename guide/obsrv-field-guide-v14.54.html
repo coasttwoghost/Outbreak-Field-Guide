@@ -1,9 +1,12 @@
 ﻿<!DOCTYPE html>
+<!-- Outbreak Field Guide. An unofficial fan guide for Resident Evil Outbreak, made for play
+     on the obsrv.org server. Not affiliated with OBSRV or Capcom. Thanks to the OBSRV crew
+     for the server and the wiki this guide leans on. -->
 <html lang="en" data-diff="VH">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>OBSRV Field Guide v14.52</title>
+<title>Outbreak Field Guide v14.54</title>
 <meta name="author" content="ALYSSA:C 100%">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600;700&family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -214,6 +217,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .hm-byline{margin-top:18px;padding-top:10px;border-top:1px solid var(--border);font:500 9px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--textd)}
 .hm-byline b{font-weight:600;color:var(--text)}
 @media(max-width:420px){.hm-byline{letter-spacing:.08em}}
+.hm-credit{margin-top:4px;font:400 12px/1.35 'Barlow Condensed',sans-serif;letter-spacing:.02em;color:var(--textd)}
 .home-versus-note{font-family:'Barlow Condensed',sans-serif;font-size:11px;
   color:var(--textd);letter-spacing:.03em;margin:2px 0 8px;text-align:center}
 
@@ -650,6 +654,11 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .snotes-toggle:hover{color:var(--textb)}
 .snotes-body{display:none;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--text)}
 .snotes-body.open{display:block}
+.flow-body{display:none;padding:14px 14px 4px}
+.flow-body.open{display:block}
+.flow-wrap.nomap{border:none}
+.flow-wrap.nomap>.snotes-toggle{display:none}
+.flow-wrap.nomap>.flow-body{padding:0}
 
 /* ══════════════════════════════════════
    WALKTHROUGH STRIP (collapsed by default)
@@ -1062,6 +1071,10 @@ html.live-fast .live-e,html.live-fast .live-p{transition-duration:.1s}
 #room-strip .rs-b{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#e8a000;white-space:nowrap}
 #room-strip .rs-k{flex:none;padding:1px 5px;border-radius:2px;font-size:9px;font-weight:700;white-space:nowrap}
 #room-strip .rs-go{display:block;width:100%;margin-top:10px;padding:5px 7px;background:none;border:1px solid rgba(232,160,0,.45);color:#e8a000;font:700 10px 'JetBrains Mono',monospace;letter-spacing:.08em;cursor:pointer}
+#room-strip .rs-c{flex:none;display:inline-flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+#room-strip .rs-c b{padding:1px 5px;border:1px solid rgba(93,173,226,.45);border-radius:2px;color:#5dade2;font-weight:700;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+#room-strip .rs-cn{display:block;margin:-2px 0 5px;font-size:9px;font-weight:500;color:var(--textd)}
+#room-strip .rs-t{font:400 13px/1.35 'Barlow Condensed',sans-serif;letter-spacing:.01em;color:var(--text);margin-bottom:4px}
 #room-strip .rs-go:hover{background:rgba(232,160,0,.08)}
 #mp-floorplan .room-zone.rz-pick{fill:rgba(232,160,0,.18);stroke:#e8a000;stroke-width:1.6}
 .map-strip{display:none;flex:none;padding:7px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;background:none;border:none;border-left:1px solid var(--border);color:var(--textd);cursor:pointer}
@@ -1219,9 +1232,9 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
 <body>
 <div id="room-peek" onclick="if(event.target===this)closeRoomPeek()">
   <div class="rp-panel">
-    <div class="rp-head"><span class="rp-badge">📍 SPAWNS HERE</span><span id="rp-title" title="Jump to this room's card in the flow" onclick="jumpToRoomCard()"></span><span class="rp-x" onclick="closeRoomPeek()">✕</span></div>
+    <div class="rp-head"><span class="rp-badge">📍 SPAWNS HERE</span><span id="rp-title" title="Open the room flow at this room" onclick="jumpToRoomCard()"></span><span class="rp-x" onclick="closeRoomPeek()">✕</span></div>
     <div class="rp-body" id="rp-body"></div>
-    <div class="rp-hint">Tap a P-badged puck to mark what you found — the pattern updates everywhere. <b>↓ FLOW CARD</b> (or the room name) jumps to it in the timeline. Esc or ✕ to close (the flow stays where you left it).</div>
+    <div class="rp-hint">Tap a P-badged puck to mark what you found — the pattern updates everywhere. <b>↓ ROOM FLOW</b> (or the room name) opens the full room list at this card. Esc or ✕ to close.</div>
   </div>
 </div>
 
@@ -1465,7 +1478,7 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
 <nav id="nav">
   <span class="nav-logo" onclick="goHome()">
     <span class="nav-logo-bh">☣</span>
-    <span>OBSRV</span>
+    <span>OUTBREAK</span>
     <span class="nav-logo-sub">FIELD GUIDE</span>
   </span>
   <button class="nbtn" id="nb-w" onclick="togRibbon('w')"><svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-2px;margin-right:3px"><circle cx="8" cy="8" r="5.2" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="8" y1="0" x2="8" y2="4" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="12" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="0" y1="8" x2="4" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/></svg> WEAPONS</button>
@@ -1473,7 +1486,7 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
   <button class="nbtn" id="nb-e" onclick="togRibbon('e')">☠️ ENEMIES</button>
   <button class="nbtn" id="nb-r" onclick="togRibbon('r')">💊 RECOVERY</button>
   <div class="nsp"></div>
-  <a class="nstatus" href="https://obsrv.org" target="_blank">obsrv.org</a>
+  <a class="nstatus" href="https://obsrv.org" target="_blank" rel="noopener" title="The OBSRV server, where Outbreak is played online. This guide is not affiliated with OBSRV.">obsrv.org</a>
 </nav>
 
 <!-- WEAPONS RIBBON: the Armory -->
@@ -1580,7 +1593,7 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
       <div id="city-nogl">3D MAP NEEDS WEBGL &middot; USE THE LEVEL MENU</div>
       <div class="c-hud" id="c-tl">
         <h1>Raccoon City</h1>
-        <div class="c-sub">RE:Outbreak field guide &middot; obsrv.org &middot; pick a flag</div>
+        <div class="c-sub">RE:Outbreak field guide &middot; pick a flag</div>
         <button class="c-btn" id="c-menu" title="Every level, Showdown and Elimination"><svg width="14" height="10" viewBox="0 0 14 10"><path d="M0 1h14M0 5h14M0 9h14" stroke="currentColor" stroke-width="1.5"/></svg>LEVELS &middot; VERSUS</button>
       </div>
       <div class="c-hud" id="c-tr">
@@ -1635,6 +1648,7 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
         </div>
       </div>
       <div class="hm-byline">Raccoon City &middot; Journalist &middot; filed by <b>ALYSSA:C 100%</b></div>
+      <div class="hm-credit">Unofficial fan guide. Not affiliated with OBSRV or Capcom. Thanks to the OBSRV crew for the server and the wiki.</div>
     </div>
   </div>
 
@@ -1706,6 +1720,11 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
     <div id="lv-map"></div>
     <div id="lv-mines"></div>
     <div id="lv-wt"></div>
+    <div class="snotes-wrap flow-wrap">
+      <button class="snotes-toggle" onclick="togFlow()">
+        <span>ROOM FLOW / EVERY ROOM CARD</span><span id="fl-arr">▼</span>
+      </button>
+      <div class="flow-body" id="flow-body">
     <div class="flow-hdr">Room Flow
       <span class="ro-tog">
         <button class="rob on" data-o="route" onclick="setRoomOrder('route')">ROUTE</button>
@@ -1715,6 +1734,8 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
       <span id="ro-hint" class="ro-hint"></span>
     </div>
     <div class="flow" id="lv-flow"></div>
+      </div>
+    </div>
     <div class="snotes-wrap">
       <button class="snotes-toggle" onclick="togSnotes()">
         <span>SCENARIO NOTES / TRIVIA</span><span id="sn-arr">▼</span>
@@ -3664,10 +3685,10 @@ zones:[
      keyItems:[
        {name:'Ace Key',  ico:'🔑',tip:'P1+P4 puzzle in 2F Waiting Room. Pass Ace Key to P1 for the safe.',plate:false,spawnRoom:'2F Waiting Room'},
        {name:'Joker Key',ico:'🔑',tip:'RNG: Rooftop barrels / 2F Main Hall balcony / Night-Duty Room locker (Kevin only) / Substation drawer.',plate:false},
-       {name:'Ruby Plate',    ico:'💎',tip:'RNG item slot — see room flow for possible locations by difficulty.',plate:true},
-       {name:'Emerald Plate', ico:'💎',tip:'RNG item slot — see room flow for possible locations by difficulty.',plate:true},
-       {name:'Onyx Plate',    ico:'💎',tip:'RNG item slot — see room flow for possible locations by difficulty.',plate:true},
-       {name:'Amethyst Plate',ico:'💎',tip:'RNG item slot — see room flow for possible locations by difficulty.',plate:true},
+       {name:'Ruby Plate',    ico:'💎',tip:'RNG item slot. Click a room on the map for the plates it can hold by difficulty.',plate:true},
+       {name:'Emerald Plate', ico:'💎',tip:'RNG item slot. Click a room on the map for the plates it can hold by difficulty.',plate:true},
+       {name:'Onyx Plate',    ico:'💎',tip:'RNG item slot. Click a room on the map for the plates it can hold by difficulty.',plate:true},
+       {name:'Amethyst Plate',ico:'💎',tip:'RNG item slot. Click a room on the map for the plates it can hold by difficulty.',plate:true},
        {name:'Sapphire Plate',ico:'💎',tip:'Fixed: trade Secret File to Ben Bertolucci in Holding Cells (all difficulties).',plate:true},
        {name:'Film Rolls A–D',ico:'🔑',tip:'A:Front Entrance→Rec.Pill · B:Rooftop→Magnum · C:Kennel→FAS+Pills (VH=Rec.Pill only) · D:Parking Ramp→SMG',plate:false}
      ],
@@ -5336,7 +5357,7 @@ function renderPriority(lvl){
         <div class="plate-gem">${gemEmoji}</div>
         <span class="plate-name-lbl">${ki.name.replace(' Plate','')}</span>
         <span class="puck-name" style="font-size:8px;color:#22d3ee">PLATE</span>
-        <div class="ptip"><div class="ptip-name">${ki.name}</div><div class="ptr"><span class="ptl">Note:</span><span class="ptv">${ki.tip}</span></div><div style="color:var(--text);font-size:8px;margin-top:3px">See ◆ markers on map &amp; room flow cards</div></div>
+        <div class="ptip"><div class="ptip-name">${ki.name}</div><div class="ptr"><span class="ptl">Note:</span><span class="ptv">${ki.tip}</span></div><div style="color:var(--text);font-size:8px;margin-top:3px">See ◆ markers on the map, then click the room</div></div>
       </div>`;
     }
     // click any key puck → item finder (all candidate rooms across pools)
@@ -5355,7 +5376,7 @@ function renderPriority(lvl){
     :lvl.priority.weapons.map(wn=>{const isO=typeof wn==='object';const nm=isO?wn.name:wn;const note=isO?wn.note:null;const w=WMAP[nm];const inner=w?mkWPuck(w,note):`<div class="puck wp">${mkSvgPuck(nm,'ranged')}</div>`;return `<div data-item="${nm}" onclick="showItemFinder(this.dataset.item,this)" style="cursor:pointer" title="📍 every room it can spawn in">${inner}</div>`;})).join('');
   const pid=renderPoolId(lvl);
   s.innerHTML=`
-    <div class="pcol k"><div class="pcol-ttl">🔑 MUST GET</div><div class="ppucks">${kp||'<span style="font-size:11px;color:var(--textd)">See room flow</span>'}</div></div>
+    <div class="pcol k"><div class="pcol-ttl">🔑 MUST GET</div><div class="ppucks">${kp||'<span style="font-size:11px;color:var(--textd)">Click a room on the map</span>'}</div></div>
     <div class="pcol w"><div class="pcol-ttl">🔫 BEST WEAPONS</div><div class="ppucks">${wp}</div></div>
     <div class="pcol p"><div class="pcol-ttl">🎯 POOL ID <span class="pid-sub">${pid.sub}</span></div>${pid.body}</div>`;
   // a folded title still says how much is under it
@@ -5630,7 +5651,7 @@ function renderPeek(){
   // UP to the map, but from inside this popup the useful jump is the opposite
   // one — down to the room's card in the timeline.
   const nav=node.querySelector('.r-mapbtn');
-  if(nav){nav.textContent='↓ FLOW CARD';nav.title='Jump to this room in the room flow';
+  if(nav){nav.textContent='↓ ROOM FLOW';nav.title='Open the room flow at this room';
     nav.onclick=()=>jumpToRoomCard();}
   requestAnimationFrame(()=>fitPeekTips(node,body));
 }
@@ -5690,6 +5711,7 @@ function jumpToRoomCard(){
   if(!ro)return;
   const slug=roomSlug(ro.name);
   closeRoomPeek();
+  if(!flowShown())setFlow(true);
   scrollToRoom(slug);
 }
 function openRoomPeek(poolRoom){
@@ -6046,7 +6068,30 @@ function navOff(pad){
   const h=document.getElementById('lv-hdr');
   return h.offsetParent&&getComputedStyle(h).position==='sticky'?44+LV_HELD_H+8:pad;
 }
+let flowOpen=false;
+try{flowOpen=localStorage.getItem('obsrv-room-flow')==='1';}catch(e){}
+// No floor plan means no room reader, so that level's cards stay out.
+function flowShown(){return flowOpen||!(curLevel&&MAP_LAYERS[curLevel.id]);}
+function syncFlow(){
+  const b=document.getElementById('flow-body'),a=document.getElementById('fl-arr'),
+        w=b&&b.closest('.flow-wrap'),on=flowShown();
+  if(b)b.classList.toggle('open',on);
+  if(a)a.textContent=on?'▲':'▼';
+  if(w)w.classList.toggle('nomap',!(curLevel&&MAP_LAYERS[curLevel.id]));
+}
+function setFlow(on){
+  flowOpen=on;syncFlow();
+  try{localStorage.setItem('obsrv-room-flow',on?'1':'0');}catch(e){}
+  stripHtml='';if(typeof stripPaint==='function')stripPaint();
+}
+function togFlow(){setFlow(!flowOpen);}
 function scrollToRoom(slug){
+  if(!flowShown()){
+    const s=resolveRoomSlug(slug)||slug,
+          ro=curLevel&&(curLevel.rooms||[]).find(r=>roomSlug(r.name)===s);
+    if(ro)openRoomPeek(ro.name);
+    return;
+  }
   const el=document.getElementById(resolveRoomSlug(slug)||slug);
   if(!el) return;
   // Switch map to schematic tab if not already visible (doesn't matter for scroll)
@@ -6929,9 +6974,21 @@ function renderFlow(lvl){
   const c=document.getElementById('lv-flow');c.innerHTML='';
   _netSeen=new Set();
   orderedRooms(lvl).forEach(r=>c.appendChild(buildRoomNode(r,lvl)));
+  syncFlow();
   stripPaint();
 }
 
+function roomNoteFor(room){
+  return room.note&&typeof room.note==='object'?room.note[diff]||(room.note.all||null):room.note||null;
+}
+function roomPlateSlots(room,lvl){
+  if(!lvl.plateSlots)return [];
+  return lvl.plateSlots.filter(s=>s.room===room.name).map(slot=>{
+    const d=slot[diff];
+    if(!d||!d.plates||!d.plates.length)return null;
+    return {trade:slot.room==='Holding Cells',fixed:!!(d.fixed||d.plates.length===1),plates:d.plates};
+  }).filter(Boolean);
+}
 function buildRoomNode(room,lvl){
   const node=document.createElement('div');
   node.className='rnode';
@@ -7087,7 +7144,7 @@ function buildRoomNode(room,lvl){
   }
 
   // ── DIFF-SPECIFIC NOTE ──
-  const noteVal=room.note&&typeof room.note==='object'?room.note[diff]||(room.note.all||null):room.note||null;
+  const noteVal=roomNoteFor(room);
   const noteEl=noteVal?`<p class="rnote">${noteVal}</p>`:'';
 
   // ── DT PLATE SECTION (Desperate Times only) ──
@@ -9123,6 +9180,9 @@ function stripPaint(){
   else{
     html+='<div class="rs-n">'+esc(name||'ROOM '+live.room)+'</div>';
     if(pick&&mlTap)html+='<div class="ml-pin-d">'+mlDetail(mlTap,true)+'</div>';
+    if(card&&card.codeCallout&&lvl.codes)html+=sect('CODES')+lvl.codes.data.map(d=>
+      row(d.loc,'<span class="rs-c">'+d.vals.map(v=>'<b>'+esc(v)+'</b>').join('')+'</span>')+
+      (d.note?'<span class="rs-cn">'+d.note+'</span>':'')).join('');
     const items=rd?stripItems(rd):{key:[],ranged:[],recovery:[]};
     if(MAP_LAYERS[lvl.id]){
       const seen={},cur=k=>k.grade[diff]||null,
@@ -9167,6 +9227,9 @@ function stripPaint(){
       keys=Object.keys(c).sort().map(n=>({n:n,b:''}));
     }
     if(keys.length||(live&&!pick))html+=sect('KEY ITEMS')+(list(keys)||none('NONE'));
+    const plates=card?roomPlateSlots(card,lvl):[];
+    if(plates.length)html+=sect('PLATES')+plates.map(p=>
+      row((p.trade?'File trade, Ben: ':'')+p.plates.join(' / '),badge(p.fixed?'FIXED':'ONE OF'))).join('');
     if(!live||pick){
       if(items.ranged.length)html+=sect('WEAPONS')+list(items.ranged);
       if(items.recovery.length)html+=sect('RECOVERY')+list(items.recovery);
@@ -9179,8 +9242,10 @@ function stripPaint(){
   if(live&&!pick)html+=sect('ENEMIES')+(live.rows||none('NONE ACTIVE'))+
     (live.far?sect('ELSEWHERE')+live.far:'')+
     (live.net?'<div class="lh-f">~ network copy, can lag behind a hit</div>':'');
+  const note=card&&roomNoteFor(card);
+  if(note)html+=sect('NOTES')+'<div class="rs-t">'+note+'</div>';
   if(peek)html+='<button class="rs-go" data-a="back">BACK TO LIVE</button>';
-  else if(card)html+='<button class="rs-go" data-a="card">OPEN CARD ↓</button>';
+  else if(card)html+='<button class="rs-go" data-a="card">'+(flowShown()?'OPEN CARD ↓':'FULL CARD')+'</button>';
   if(!h){
     h=document.createElement('div');h.id='room-strip';
     h.onclick=e=>{
