@@ -1,0 +1,71 @@
+name: release
+
+# Builds the Windows download on GitHub's own machine and attaches it to a release.
+# Push a tag like v1.0.0 to publish; a tag with a hyphen (v1.0.0-beta.1) is marked
+# as a pre-release. A push to main, or "Run workflow" on the Actions tab, builds and
+# tests without releasing; the zip is kept as a run artifact.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: python -m pip install pyinstaller==6.11.1
+
+      - name: Check the source
+        run: |
+          python -m py_compile bridge/bridge.py bridge/game_reader.py bridge/package.py
+          python bridge/test_game_reader.py --selftest
+
+      - name: Build
+        run: python bridge/package.py
+
+      - name: Smoke test
+        shell: pwsh
+        run: |
+          $exe = "bridge/dist/Outbreak Field Guide/Outbreak Field Guide.exe"
+          $p = Start-Process -FilePath $exe -ArgumentList "--no-browser","--no-update","--port","9301" -PassThru
+          $ok = $false
+          foreach ($i in 1..40) {
+            Start-Sleep -Milliseconds 500
+            try {
+              $s = Invoke-RestMethod http://127.0.0.1:9301/status
+              if ($s.reader -eq "native" -and $s.guide) { $ok = $true; break }
+            } catch {}
+          }
+          $page = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:9301/
+          Stop-Process -Id $p.Id -Force
+          if (-not $ok -or $page.StatusCode -ne 200) { throw "the built exe did not serve the guide" }
+          "ok: reader native, guide $($s.guide)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Outbreak-Field-Guide
+          path: bridge/dist/Outbreak Field Guide.zip
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $a = @("release", "create", $tag, "bridge/dist/Outbreak Field Guide.zip",
+                 "--title", "Outbreak Field Guide $tag", "--generate-notes")
+          if ($tag -like "*-*") { $a += "--prerelease" }
+          gh @a

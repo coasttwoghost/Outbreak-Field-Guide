@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+bridge/build/
+bridge/dist/
+bridge/sessions/
+bridge/virus-log.jsonl
