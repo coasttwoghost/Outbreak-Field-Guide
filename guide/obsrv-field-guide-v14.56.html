@@ -6,7 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Outbreak Field Guide v14.54</title>
+<title>Outbreak Field Guide v14.56</title>
 <meta name="author" content="ALYSSA:C 100%">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600;700&family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -195,6 +195,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .tp-scissor{background:rgba(180,80,180,.1);color:#d080d0;border:1px solid rgba(180,80,180,.2)}
 .tp-hunter{background:rgba(200,100,50,.1);color:#e08040;border:1px solid rgba(200,100,50,.2)}
 .tp-moth{background:rgba(100,170,80,.1);color:#80c060;border:1px solid rgba(100,170,80,.2)}
+.tp-licker{background:rgba(192,57,43,.1);color:#e06060;border:1px solid rgba(192,57,43,.2)}
 .tp-leech{background:rgba(0,180,160,.1);color:var(--teal);border:1px solid rgba(0,180,160,.2)}
 .tp-elephant{background:rgba(200,160,50,.1);color:#c8a030;border:1px solid rgba(200,160,50,.2)}
 .tp-lion{background:rgba(220,180,60,.1);color:#d4aa30;border:1px solid rgba(220,180,60,.2)}
@@ -238,6 +239,48 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 ══════════════════════════════════════ */
 #lvview{display:none;padding:20px 24px 80px;max-width:1200px;margin:0 auto}
 #lvview.on{display:block}
+/* v14.56 level page: from 1200px a right column holds this level's own 3D model and the room
+   strip, docked, so the plan and what is in a room sit side by side. Below 1200 nothing changes. */
+:root{--rec:#7ed957;--ammo:#c9a46a}   /* recovery plus, ammo bullet: one meaning each (user 11/06) */
+#lv-side{display:none}
+@media(min-width:1200px){
+  #lvview{max-width:1880px}
+  #lvview.on{display:grid;grid-template-columns:minmax(0,1fr) clamp(320px,19.5vw,372px);column-gap:16px;align-items:start}
+  #lvview.on>*{grid-column:1;min-width:0}
+  #lvview.on>#lv-side{grid-column:2;grid-row:1 / span 40;display:flex;flex-direction:column;gap:10px;position:sticky;top:56px;max-height:calc(100vh - 68px);align-self:start}
+  #lv-side #room-strip{display:block;position:static;width:auto;max-height:none;flex:1 1 auto;min-height:0;overflow-y:auto}
+  /* plans fill the column (user 11/06: bigger), a tall sheet capped to the window */
+  #mp-floorplan .bp-floor-wrap{max-width:none!important}
+  #mp-floorplan .bp-floor-wrap>svg{display:block;width:100%;height:auto;max-height:calc(100vh - 120px);margin:0 auto}
+}
+#lv-3d{position:relative;height:clamp(250px,15vw,290px);flex:none;border:1px solid var(--border);background:var(--bg);overflow:hidden;cursor:grab;touch-action:none}
+#lv-3d.drag{cursor:grabbing}
+#lv-3d[hidden]{display:none}
+#lv-3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#lv-3d .l3-h{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;padding:7px 9px;pointer-events:none}
+#lv-3d .l3-h b{font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--textb);background:rgba(7,9,12,.8);padding:3px 5px}
+#lv-3d .l3-h b em{font-style:normal;color:var(--amber);margin-right:6px}
+#lv-3d .l3-h i{font:normal 600 9px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--textd);background:rgba(7,9,12,.8);padding:3px 5px}
+#lv-3d .l3-f{position:absolute;left:9px;right:9px;bottom:7px;display:flex;justify-content:space-between;font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(200,214,224,.55);pointer-events:none}
+#lv-3d .l3-f b{font-weight:600;color:var(--teal)}
+/* drop layer: what spawns where, drawn on the plan in screen pixels */
+#drop-key{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
+#drop-key .dk-l{font:600 9px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--textd);margin-right:4px}
+#drop-key button{display:inline-flex;align-items:center;gap:6px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;padding:5px 8px;border:1px solid var(--border2);border-radius:2px;background:none;color:var(--textd);cursor:pointer}
+#drop-key button.on{color:var(--text);border-color:var(--textd)}
+#drop-key svg{width:11px;height:11px}
+#drop-key .dk-b{display:inline-flex;align-items:center;gap:6px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--textd);padding:5px 2px}
+g.drop-ov .drop{cursor:pointer}
+g.drop-ov .drop .hit{fill:transparent}
+g.drop-ov .drop:hover .mk{filter:brightness(1.35)}
+g.drop-ov .drop .nb rect{fill:#07090c;stroke:var(--textd)}
+g.drop-ov .drop .nb text{font-family:'JetBrains Mono',monospace;font-weight:700;fill:var(--textb);text-anchor:middle;dominant-baseline:central}
+/* players: an arrow along their direction of travel once they move; enemies: a red chevron on their facing */
+.live-p .live-arrow{display:none;fill:var(--pc);stroke:#07090c;stroke-width:1}
+.live-p.has-head .live-arrow{display:block}
+.live-p.has-head .live-dot,.live-p.has-head .live-halo{display:none}
+.live-e .le-dot{display:none}
+.live-e.le-spawn .le-dot{display:block}
 
 /* Level header. Row one holds at the top of the window, row two scrolls away. */
 #lv-held{height:1px}
@@ -1082,7 +1125,7 @@ html.live-fast .live-e,html.live-fast .live-p{transition-duration:.1s}
 .map-strip.on::before{background:currentColor}
 .map-strip.on{color:#00b4a0;background:rgba(0,180,160,.06)}
 .map-strip:hover:not(.on){color:var(--textb)}
-@media(min-width:1680px){.map-strip{display:block}}
+@media(min-width:1200px){.map-strip{display:block}}
 /* MAP LAYERS: one element. A wrapping row above the map; the left gutter once there is one.
    In the gutters both panels ride with the map section: top is set by gutterRide(). */
 .map-lay{display:block}
@@ -1134,7 +1177,7 @@ html.live-fast .live-e,html.live-fast .live-p{transition-duration:.1s}
 #mp-floorplan .ml-pin.sel>*:first-child{stroke:#fff;stroke-width:2}
 #mp-floorplan .ml-pin:focus-visible>*:first-child{stroke:#00b4a0;stroke-width:2}
 #mp-floorplan .ml-thread{stroke-dasharray:5 4;fill:none;pointer-events:none}
-@media(min-width:1680px){
+@media(min-width:1680px) and (max-width:1199px){
   #map-layers{position:fixed;top:56px;right:calc(50% + 590px);z-index:30;box-sizing:border-box;width:min(300px,calc(50% - 602px));max-height:calc(100vh - 68px);overflow-y:auto;flex-direction:column;flex-wrap:nowrap;margin:0}
   .ml-box{flex:none}
   .ml-on{max-height:none;overflow:visible}
@@ -1655,6 +1698,7 @@ text.rl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight:
   <!-- LEVEL VIEW -->
   <div id="lvview">
     <div id="lv-held"></div>
+    <div id="lv-side"><div id="lv-3d" hidden><canvas class="l3-gl"></canvas><canvas class="l3-ov"></canvas><div class="l3-h"><b class="l3-n"></b><i>DRAG TO TURN</i></div><div class="l3-f"><span class="l3-hud"></span><span class="l3-live"></span></div></div></div>
     <div class="lv-hdr" id="lv-hdr">
       <div class="lv-tab" id="lv-tab"></div>
       <div class="lv-stamp" id="lv-stamp"></div>
@@ -2628,8 +2672,8 @@ const LEVELS = [
    ]}
   },
   {id:'hellfire',name:'Hellfire',code:'r023',file:1,wiki:'Hellfire',num:4,
-   threats:[{c:'tp-moth',l:'Giant Moth'},{c:'tp-zombie',l:'Zombie'}],
-   notes:"Apple Inn hotel — on fire. Giant Moths (Torch Moths) spread fire and inflict BURN status — Blue Herbs treat burn, not Green. The Suspended (Regis Licker) is the boss. Room 201→Bathroom has no lock on H (only E/N/VH have locks). Store Room locker loses its lock entirely on VH. Security Office keypad and Room 101 safe codes are per-run. Power puzzles have variant solutions by difficulty.",
+   threats:[{c:'tp-zombie',l:'Zombie'},{c:'tp-licker',l:'Licker'}],
+   notes:"Apple Inn hotel — on fire. The Suspended (Regis Licker) is the boss. Room 201→Bathroom has no lock on H (only E/N/VH have locks). Store Room locker loses its lock entirely on VH. Security Office keypad and Room 101 safe codes are per-run. Power puzzles have variant solutions by difficulty.",
    spawns:null,
    codes:{title:'Code Solutions',data:[
      {loc:'Security Office Keypad *',vals:['0721','2287','6354','5128'],note:'One of four — RNG'},
@@ -2638,7 +2682,7 @@ const LEVELS = [
    priority:{
      keyItems:[{name:'Room Keys',ico:'🔑',tip:'Various suite keys to progress floors'},{name:'Safe/Keypad Codes',ico:'🔑',tip:'Security Office + Room 101 — see codes'}],
      weapons:['Shotgun','Flame Rounds','Handgun HP'],
-     recovery:[{name:'Blue Herb',ico:'🌿',tip:'⚠ CRITICAL — treats BURN from moths'},{name:'First Aid Spray',ico:'💊',tip:'Staff locker / room safes'}]
+     recovery:[{name:'Blue Herb',ico:'🌿',tip:'Cures poison'},{name:'First Aid Spray',ico:'💊',tip:'Staff locker / room safes'}]
    },
    rooms:[
     {name:'Apple Inn Front Lobby',leads:'Apple Inn Square / Corridor / Lounge Stairs',thumb:null,lockEntries:[],keyItems:{E:[],N:[],H:[],VH:[]},weapons:{E:[{name:'45 Auto Rounds (1×7)',ico:'',tip:'On the 2F in the south east corner.'},{name:'Handgun Rounds (1×30)',ico:'',tip:'On the 2F in the north west corner.'},{name:'Shotgun Rounds (1×7)',ico:'',tip:'On the 2F in the north east corner.'},{name:'Iron Pipe',ico:'',tip:'On the 1F on the floor next to the luggage in the north west corner.'},{name:'Iron Pipe',ico:'',tip:'On the 1F in the south west corner.'},{name:'Shotgun Rounds (1×7)',ico:'',tip:'On the 1F on the bench behind the ladder in the middle of the room.'},{name:'Shotgun Rounds (1×7)',ico:'',tip:'On the 1F, on the coffee table between the two sofas on the east side.'}],N:[{name:'Handgun Rounds (1×15)',ico:'',tip:'On the 2F in the north west corner.'},{name:'Shotgun Rounds (1×5)',ico:'',tip:'On the 2F in the north east corner.'},{name:'Iron Pipe',ico:'',tip:'On the 1F in the south west corner.'},{name:'Shotgun Rounds (1×5)',ico:'',tip:'On the 1F, on the coffee table between the two sofas on the east side.'}],H:[{name:'Shotgun Rounds (1×5)',ico:'',tip:'On the 2F in the north east corner.'},{name:'Iron Pipe',ico:'',tip:'On the 1F on the floor next to the luggage in the north west corner.'},{name:'Curved Iron Pipe',ico:'',tip:'On the 1F in the south west corner.'},{name:'Shotgun Rounds (1×5)',ico:'',tip:'On the 1F, on the coffee table between the two sofas on the east side.'}],VH:[{name:'Iron Pipe',ico:'',tip:'On the 1F on the floor next to the luggage in the north west corner.'}]},recovery:{E:[{name:'1 First Aid Spray',ico:'',tip:'On the 2F in the south west corner.'},{name:'1 Green Herb',ico:'',tip:'On the 2F on the north side of the central balcony.'},{name:'2 Green Herbs',ico:'',tip:'On the 1F in the south east corner.'},{name:'1 First Aid Spray',ico:'',tip:'On the floor at the end of the 1F corridor.'}],N:[{name:'1 Green Herb',ico:'',tip:'On the 2F in the south west corner.'},{name:'1 Green Herb',ico:'',tip:'On the 2F on the north side of the central balcony.'},{name:'2 Green Herbs',ico:'',tip:'On the 1F in the south east corner.'},{name:'1 First Aid Spray',ico:'',tip:'On the floor at the end of the 1F corridor.'}],H:[{name:'1 Green Herb',ico:'',tip:'On the 2F on the north side of the central balcony.'},{name:'1 Green Herb',ico:'',tip:'On the 1F in the south east corner.'},{name:'1 First Aid Spray',ico:'',tip:'On the floor at the end of the 1F corridor.'}],VH:[{name:'1 Green Herb',ico:'',tip:'On the floor at the end of the 1F corridor.'}]},misc:{E:[],N:[],H:[],VH:[]},enemies:{E:['Regis Licker','2 Lickers'],N:['Regis Licker','3 Lickers'],H:['Regis Licker','4 Lickers'],VH:['Regis Licker','4 Lickers']},note:{E:'',N:'',H:'',VH:'',all:'Multi-floor lobby. Regis Licker + Lickers spawn when attempting to exit via 1F corridor.'},codeCallout:false},
@@ -3461,7 +3505,7 @@ const LEVELS = [
    }
   },
   {id:'underbelly',name:'Underbelly',code:'r036',file:2,wiki:'Underbelly',num:7,
-   threats:[{c:'tp-mega',l:'Mega Bite'},{c:'tp-boss',l:'Giga Bite (Boss)'}],
+   threats:[{c:'tp-mega',l:'Mega Bite'},{c:'tp-boss',l:'Giga Bite'}],
    notes:"Raccoon City subway. Mega Bites are T-virus infected fleas — attracted to blood packs. Placing a blood pack in the train loading zone prevents them from attacking. They grow larger after feeding and inflict POISON. Giga Bite kidnaps a player after train decouples — fight her with Pesticide Spray on raised head or firearms/Molotovs. Jim has exclusive vent access — secret room chance. Killing Mega Bites in vent tower causes respawn on top floor — avoid. Two endings: catch the train (Railway to Tomorrow) or miss it (Cold Comfort). West/East Concourse doors only appear H/VH.",
    spawns:{title:'VH Spawn Positions',headers:['P1 (Host) & P3','P2 & P4'],rows:[['West Entrance','East Entrance']]},
    codes:{title:'Control Room Drawer Codes (6 possible sets)',data:[
@@ -4714,7 +4758,7 @@ zones:[
 let diff='VH',curRibbon=null,curLevel=null,wSortKey='near',wSortDir=-1,wFilter='all',wLevelFilter=null;
 let netPattern='ALL';
 let stripOn=false,stripPick=null,stripLive=null,stripHtml='';
-let mlOpen=matchMedia('(min-width:1680px)').matches,mlLvl=null,mlOn={picks:0,keys:0,important:0,weapons:0,terr:0,supply:0},
+let mlOpen=false,mlLvl=null,mlOn={picks:0,keys:0,important:0,weapons:0,terr:0,supply:0},
     mlFocus=null,mlTap=null,mlPins=[],mlSpotCache=null,mlPieces=null,mlTinted=[],mlFinds=[],mlFindAt='';
 
 /* SPAWN_POOLS:BEGIN — generated by _scripts/build_net_block.py, do not hand-edit */
@@ -8469,7 +8513,7 @@ function liveEnemyMark(g,e){
     m.setAttribute('data-k',e.k);
     const s=document.createElementNS(LIVE_NS,'g');s.setAttribute('class','le-s');
     const dir=document.createElementNS(LIVE_NS,'path');
-    dir.setAttribute('class','le-dir');dir.setAttribute('d','M6.2 0L2 -2.5V2.5Z');
+    dir.setAttribute('class','le-dir');dir.setAttribute('d','M5.6 0L-3.6 -4.8V-1.9L0.4 0L-3.6 1.9V4.8Z');   // v14.56: a chevron on the enemy's facing
     const dot=document.createElementNS(LIVE_NS,'circle');
     dot.setAttribute('class','le-dot');dot.setAttribute('r','2.9');
     const tag=document.createElementNS(LIVE_NS,'text');
@@ -8503,6 +8547,7 @@ function liveEnemyDraw(svg,sid,st){
     if(!want[c.getAttribute('data-k')])c.remove();});
 }
 
+const liveHead={};
 function liveMarker(g,p){
   const key='s'+p.slot;
   let m=null;
@@ -8516,10 +8561,19 @@ function liveMarker(g,p){
     dot.setAttribute('class','live-dot');dot.setAttribute('r','4.2');
     const tag=document.createElementNS(LIVE_NS,'text');
     tag.setAttribute('class','live-tag');tag.setAttribute('y','-11');
-    m.appendChild(halo);m.appendChild(dot);m.appendChild(tag);
+    const arw=document.createElementNS(LIVE_NS,'path');
+    arw.setAttribute('class','live-arrow');arw.setAttribute('d','M8 0L-5.2 -5.6L-2.2 0L-5.2 5.6Z');
+    m.appendChild(halo);m.appendChild(dot);m.appendChild(arw);m.appendChild(tag);
     g.appendChild(m);
   }
   m.style.setProperty('--pc',LIVE_SLOT[p.slot]||'#00b4a0');
+  // The bridge sends no player facing yet, so the arrow follows the direction of travel on this
+  // sheet; until a player has moved, and while held or a ghost, the dot stays.
+  {const h=liveHead[key],sid=p.proj.svg,x=p.proj.x,y=p.proj.y;let deg=h&&h.sid===sid?h.deg:null;
+   if(h&&h.sid===sid&&Math.hypot(x-h.x,y-h.y)>2)deg=Math.atan2(y-h.y,x-h.x)*180/Math.PI;
+   if(!h||h.sid!==sid||Math.hypot(x-h.x,y-h.y)>2)liveHead[key]={sid:sid,x:x,y:y,deg:deg};
+   const on=deg!=null&&!p.held&&!p.isGhost;m.classList.toggle('has-head',on);
+   if(on)m.querySelector('.live-arrow').setAttribute('transform','rotate('+deg.toFixed(0)+')');}
   m.classList.toggle('live-held',!!p.held);
   m.classList.toggle('live-ghost',!!p.isGhost);
   const tag=m.querySelector('.live-tag');
@@ -9137,7 +9191,7 @@ function stripItems(rd){
   return out;
 }
 function stripClick(name,no){
-  if(!stripOn||LIVE_CAST||!matchMedia('(min-width:1680px)').matches)return false;
+  if(!stripOn||LIVE_CAST||!matchMedia('(min-width:1200px)').matches)return false;
   stripPick=stripLive&&stripLive.name===name?null:{lvl:curLevel.id,name:name,no:no};
   stripPaint();
   return true;
@@ -9253,7 +9307,7 @@ function stripPaint(){
       if(a==='back'){stripPick=null;stripPaint();}
       if(a==='card'&&h.dataset.card)scrollToRoom(h.dataset.card);
     };
-    document.body.appendChild(h);stripHtml='';
+    (document.getElementById('lv-side')||document.body).appendChild(h);stripHtml='';
   }
   h.dataset.card=cardSlug||'';
   h.classList.toggle('ref',!live);
@@ -9336,7 +9390,7 @@ const ML_SRC={c:'schematic',b:'map box',t:'lock chart',r:'room card'};
 const mlEsc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mlData=()=>curLevel&&!LIVE_CAST?MAP_LAYERS[curLevel.id]:null;
 const mlRoomName=(lv,n)=>lv.rooms[n]?lv.rooms[n].n:'Room '+n;
-const mlStripShows=()=>stripOn&&!LIVE_CAST&&matchMedia('(min-width:1680px)').matches;
+const mlStripShows=()=>stripOn&&!LIVE_CAST&&matchMedia('(min-width:1200px)').matches;
 const mlCol=it=>it.col;
 function mlCode(it){
   if(ML_CODE[it.name]!==undefined)return ML_CODE[it.name];
@@ -10121,7 +10175,9 @@ menuBtn.onclick = () => openMenu(!menu.classList.contains('open'));
 document.getElementById('hm-x').onclick = () => openMenu(false);
 menu.addEventListener('click', e => { if (e.target.closest('.level-tile')) openMenu(false); });
 const CAST = typeof LIVE_CAST !== 'undefined' && LIVE_CAST;
-const FXF = LAYOUT.frame_xform;     // disc frame -> city feet, for Outbreak, Hellfire and End of the Road
+const FXF = LAYOUT.frame_xform;
+// labels and hit tests in CSS px times LS; the stream scene sets CITY_LABEL_SCALE so flags read at 1080p. The guide leaves it at 1.
+const LS = typeof CITY_LABEL_SCALE !== 'undefined' ? CITY_LABEL_SCALE : 1;     // disc frame -> city feet, for Outbreak, Hellfire and End of the Road
 
 /* ---------- sites: map keys and areas; names, numbers, files and threats come from the guide's LEVELS ---------- */
 const SITES = [
@@ -10138,6 +10194,8 @@ const SITES = [
 ];
 const KEY = Object.fromEntries(LAYOUT.keys.map(k => [k.id, k]));
 SITES.forEach((L, i) => { L.g = i + 1; L.k = KEY[L.key]; L.lv = LEVELS.find(v => v.id === L.id) || { name: L.id, num: i + 1, file: 0, threats: [] }; L.dist = 2400; });
+// The level pages draw each level's own building from the same models (guide v14.56), with nothing else of the city.
+window.__cityModels = { models: MODELS, sites: SITES.map(L => ({ id: L.id, mc: L.mc, site: L.site })) };
 const BYNUM = SITES.map((_, i) => i).sort((a, b) => SITES[a].lv.num - SITES[b].lv.num);   // arrow keys follow the guide's numbering
 const GROUP = Object.fromEntries(SITES.map(L => [L.key, L.g]));
 
@@ -10388,8 +10446,8 @@ const uMVP = U('mvp'), uEye = U('eye'), uSel = U('sel'), uHov = U('hov'), uRev =
 const bind = a => { gl.bindBuffer(gl.ARRAY_BUFFER, a.bo); gl.enableVertexAttribArray(a.loc); gl.vertexAttribPointer(a.loc, a.size, gl.FLOAT, false, 0, 0); };
 
 let W = 0, Hh = 0, DPR = 1;
-function resize() { DPR = Math.min(2, devicePixelRatio || 1); const r = cv.getBoundingClientRect(); if (!r.width) return; W = r.width; Hh = r.height;
-  for (const c of [cv, ov]) { c.width = W * DPR; c.height = Hh * DPR; } ctx.setTransform(DPR, 0, 0, DPR, 0, 0); gl.viewport(0, 0, cv.width, cv.height);
+function resize() { DPR = Math.min(2, devicePixelRatio || 1); const r = cv.getBoundingClientRect(); if (!r.width) return; W = r.width / LS; Hh = r.height / LS;
+  for (const c of [cv, ov]) { c.width = Math.round(r.width * DPR); c.height = Math.round(r.height * DPR); } ctx.setTransform(DPR * LS, 0, 0, DPR * LS, 0, 0); gl.viewport(0, 0, cv.width, cv.height);
   gl.clearColor(.027, .035, .047, 1); gl.clear(gl.COLOR_BUFFER_BIT); }
 addEventListener('resize', resize); resize();
 
@@ -10453,7 +10511,7 @@ stage.addEventListener('pointerdown', e => { if (!onStage(e)) return;
   dragging = true; moved = 0; stage.classList.add('drag');
   mode = (e.button === 2 || e.shiftKey) ? 'pan' : 'rotate';
   if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); mode = 'pinch'; } });
-stage.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+stage.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); mouse.x = (e.clientX - r.left) / LS; mouse.y = (e.clientY - r.top) / LS;
   if (!dragging || !ptrs.has(e.pointerId)) return;
   const prev = ptrs.get(e.pointerId); ptrs.set(e.pointerId, [e.clientX, e.clientY]);
   const dx = e.clientX - prev[0], dy = e.clientY - prev[1]; moved += Math.abs(dx) + Math.abs(dy);
@@ -10463,7 +10521,7 @@ stage.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(
   else { cam.yaw -= dx * .006; cam.g.pitch = Math.max(.08, Math.min(1.5, cam.g.pitch + dy * .005)); } });
 const endPtr = e => { if (!ptrs.has(e.pointerId)) return; ptrs.delete(e.pointerId); if (ptrs.size) return; dragging = false; stage.classList.remove('drag');
   if (e.type === 'pointerup' && moved < 6 && e.button === 0) { const r = cv.getBoundingClientRect();
-    const i = pickAt(e.clientX - r.left, e.clientY - r.top, e.pointerType === 'mouse' ? 34 : 46);
+    const i = pickAt((e.clientX - r.left) / LS, (e.clientY - r.top) / LS, e.pointerType === 'mouse' ? 34 : 46);
     if (i >= 0) { if (i === sel) openLevel(i); else select(i); } else spin = !spin; } };
 stage.addEventListener('pointerup', endPtr); stage.addEventListener('pointercancel', endPtr);
 stage.addEventListener('pointerleave', () => { mouse.x = mouse.y = -1; });
@@ -10506,8 +10564,8 @@ function frame(now) {
   if (!dragging && mouse.x >= 0 && !menu.matches(':hover')) setHover(pickAt(mouse.x, mouse.y, 34));
   ctx.textBaseline = 'middle';
   const tl = hudTL.getBoundingClientRect(), sr = cv.getBoundingClientRect(), br = brief.classList.contains('on') ? brief.getBoundingClientRect() : null;
-  const placed = [{ x0: 0, y0: 0, x1: tl.right - sr.left + 8, y1: tl.bottom - sr.top + 6 }];
-  if (br) placed.push({ x0: br.left - sr.left - 6, y0: br.top - sr.top - 6, x1: br.right - sr.left + 6, y1: br.bottom - sr.top + 6 });
+  const placed = [{ x0: 0, y0: 0, x1: (tl.right - sr.left) / LS + 8, y1: (tl.bottom - sr.top) / LS + 6 }];
+  if (br) placed.push({ x0: (br.left - sr.left) / LS - 6, y0: (br.top - sr.top) / LS - 6, x1: (br.right - sr.left) / LS + 6, y1: (br.bottom - sr.top) / LS + 6 });
   const hit = b => placed.some(q => b.x0 < q.x1 && b.x1 > q.x0 && b.y0 < q.y1 && b.y1 > q.y0); const nb = [];
   const order = SITES.map((_, i) => i).filter(visible)
     .sort((a, b) => ((b === sel) - (a === sel)) || ((b === hover) - (a === hover)) || pts[a][2] - pts[b][2]);
@@ -10544,6 +10602,226 @@ window.__city = { segments: N / 2, sites: SITES, select, cam, open: openLevel, g
 })();
 </script>
 <!-- CITY_MAP:END -->
+<script>
+/* v14.56 LEVEL PAGE: this level's own 3D model in the right column, and the drop layer on the
+   floor plan. Drafted on _reference/mockup/level-page-board-v1.4.html; see _docs/level-page-redesign.md. */
+(()=>{
+if(typeof LIVE_CAST!=='undefined'&&LIVE_CAST)return;      // the stream view draws its own sheet
+const bare=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const lvRooms=lv=>{                                       // disc room by any of its names
+  const t=MAP_LAYERS[lv.id],z=(LIVE_MAP[lv.id]||{}).z||{},by={};
+  if(t)Object.entries(t.rooms).forEach(([no,r])=>by[bare(r.n)]=+no);
+  Object.entries(z).forEach(([no,zs])=>zs.forEach(q=>by[bare(q[2])]=+no));
+  return by;
+};
+
+/* ---------- symbols (map-symbols-v1.0, the user's picks 11/06) ---------- */
+const GLYPH={
+  key:c=>`<g fill="none"><g stroke="#07090c" stroke-width="4"><circle cx="6.6" cy="10" r="3.6"/><path d="M10.2 10H17.4M15 10v3.2M17.2 10v2.6"/></g><g stroke="${c}" stroke-width="2.2"><circle cx="6.6" cy="10" r="3.6"/><path d="M10.2 10H17.4M15 10v3.2M17.2 10v2.6"/></g></g>`,
+  imp:c=>`<circle cx="10" cy="10" r="8.6" fill="none" stroke="#07090c" stroke-width="2.6"/><circle cx="10" cy="10" r="8.6" fill="none" stroke="${c}" stroke-width="1.2"/><path d="M10 3.6L11.8 7.7L16.2 8L12.8 10.9L13.9 15.2L10 12.9L6.1 15.2L7.2 10.9L3.8 8L8.2 7.7Z" fill="${c}" stroke="#07090c" stroke-width=".9"/>`,
+  wpn:c=>`<g fill="none"><g stroke="#07090c" stroke-width="3.6"><circle cx="10" cy="10" r="5"/><path d="M10 2.5v4M10 13.5v4M2.5 10h4M13.5 10h4"/></g><g stroke="${c}" stroke-width="1.9"><circle cx="10" cy="10" r="5"/><path d="M10 2.5v4M10 13.5v4M2.5 10h4M13.5 10h4"/></g></g>`,
+  ammo:c=>`<path d="M8 15.5V8.5Q8 4.5 10 3.5Q12 4.5 12 8.5V15.5Z" fill="${c}" stroke="#07090c" stroke-width="1"/><rect x="7.3" y="14.4" width="5.4" height="2.4" fill="${c}" stroke="#07090c" stroke-width=".8"/>`,
+  rec:c=>`<path d="M8.2 3.8h3.6v4.4h4.4v3.6h-4.4v4.4h-3.6v-4.4h-4.4v-3.6h4.4Z" fill="${c}" stroke="#07090c" stroke-width="1"/>`,
+};
+const CATS=[['key','KEYS'],['imp','KEY ITEMS'],['wpn','WEAPONS'],['ammo','AMMO'],['rec','RECOVERY']];
+const CAT_COL={key:'var(--textb)',imp:'var(--textb)',wpn:'#e8eef4',ammo:'var(--ammo)',rec:'var(--rec)'};
+// netCat's split, with keys told from other key items by name
+const dcat=(id,n)=>id>=10000||(id>=450&&id<1000)?(/\bkey\b/i.test(n||'')?'key':'imp'):id>=300&&id<400?'rec':id>=200&&id<300?'ammo':'wpn';
+const dcol=(lv,d)=>d.c==='key'||d.c==='imp'?(((MAP_LAYERS[lv.id]||{items:{}}).items[d.id]||{}).col||'#8d9aa8'):CAT_COL[d.c];
+const glyphSVG=(c,col,x,y,s)=>`<g class="mk" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${(s/20).toFixed(4)})">${GLYPH[c](col)}</g>`;
+let dropOn={key:1,imp:1,wpn:1,ammo:1,rec:1};
+try{const j=JSON.parse(localStorage.getItem('obsrv-drops')||'null');if(j)dropOn=Object.assign(dropOn,j);}catch(e){}
+
+// a spawn point's items in the current mode: SP is fixed; MP is the lobby pattern, or every pattern
+function pointItems(p){
+  if(netMode==='SP'){const it=p.sp&&p.sp[diff];return it?[{id:it.id,name:it.name,pct:100}]:[];}
+  const mp=p.mp&&p.mp[diff];if(!mp)return [];
+  const pats=netPattern==='ALL'?[0,1,2,3]:[+netPattern],by={};
+  pats.forEach(i=>(mp[i]||[]).forEach(it=>{const o=by[it.id];if(!o||it.pct>o.pct)by[it.id]={id:it.id,name:it.name,pct:it.pct};}));
+  return Object.values(by);
+}
+const MARK_PX=16,HIT_PX=26;   // the glyph box; the shapes fill 60-85% of it, so 10-14px on screen
+function dropDraw(){
+  const panel=document.getElementById('mp-floorplan'),lv=curLevel;
+  if(!panel||!lv)return;
+  panel.querySelectorAll('g.drop-ov').forEach(g=>g.remove());
+  const pool=SPAWN_POOLS[lv.code],lm=LIVE_MAP[lv.id];
+  let key=document.getElementById('drop-key');
+  if(!pool||!lm||!lm.i){if(key)key.remove();return;}
+  if(!key){key=document.createElement('div');key.id='drop-key';panel.insertBefore(key,panel.firstChild);}
+  const cnt={};pool.rooms.forEach(r=>r.points.forEach(p=>{if(lm.i.p[p.pt])pointItems(p).forEach(it=>{const c=dcat(it.id,it.name);cnt[c]=(cnt[c]||0)+1;});}));
+  key.innerHTML='<span class="dk-l">ON THE MAP</span>'+CATS.map(([c,n])=>`<button type="button" class="${dropOn[c]?'on':''}" data-dc="${c}"><svg viewBox="0 0 10 10">${glyphSVG(c,CAT_COL[c],0,0,10)}</svg>${n} ${cnt[c]||0}</button>`).join('')+
+    `<span class="dk-b"><svg viewBox="-9 -9 18 18"><path d="M8 0L-5.2 -5.6L-2.2 0L-5.2 5.6Z" fill="${LIVE_SLOT[0]}"/></svg>PLAYER</span><span class="dk-b"><svg viewBox="-7 -7 14 14"><path d="M5.6 0L-3.6 -4.8V-1.9L0.4 0L-3.6 1.9V4.8Z" fill="#e05c4d"/></svg>ENEMY</span>`;
+  key.querySelectorAll('[data-dc]').forEach(b=>b.onclick=()=>{dropOn[b.dataset.dc]^=1;try{localStorage.setItem('obsrv-drops',JSON.stringify(dropOn));}catch(e){}dropDraw();});
+  const names={};Object.entries(lm.z||{}).forEach(([no,zs])=>zs.forEach(q=>{(names[no]=names[no]||{})[q[0]]=q[2];}));
+  const per={};
+  pool.rooms.forEach(r=>r.points.forEach(p=>{
+    const at=lm.i.p[p.pt];if(!at)return;
+    const sid=lm.i.s[at[0]];
+    pointItems(p).forEach(it=>{const d={...it,c:dcat(it.id,it.name),room:r.no,rn:r.room,x:at[1],y:at[2]};if(dropOn[d.c])(per[sid]=per[sid]||[]).push(d);});
+  }));
+  const NS='http://www.w3.org/2000/svg',esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  Object.entries(per).forEach(([sid,list])=>{
+    const svg=panel.querySelector('svg[id="'+sid+'"]');if(!svg)return;
+    const m=svg.getScreenCTM();if(!m||!m.a)return;            // hidden tab: drawn when it shows
+    const k=1/m.a,s=MARK_PX*k,hs=HIT_PX*k,g=document.createElementNS(NS,'g');
+    g.setAttribute('class','drop-ov');
+    // One marker per spot on the plan (user 11/06): a spot can hold 2 to 10 possible items
+    // across the lobby patterns, and co-op copies stack on one place. The marker shows the most
+    // important item there, a badge counts the rest, the tooltip lists them all, a click opens the room.
+    const RANK={key:0,imp:1,wpn:2,ammo:3,rec:4},spots={};
+    list.forEach(d=>{const at=Math.round(d.x/(s*.6))+','+Math.round(d.y/(s*.6));(spots[at]=spots[at]||[]).push(d);});
+    Object.values(spots).forEach(ds=>{
+      const by={};ds.forEach(d=>{const o=by[d.id];by[d.id]=o?{...o,n:o.n+1,pct:Math.max(o.pct,d.pct)}:{...d,n:1};});
+      const items=Object.values(by).sort((a,b)=>RANK[a.c]-RANK[b.c]||b.pct-a.pct||a.name.localeCompare(b.name));
+      const d=items[0],cx=ds.reduce((a,q)=>a+q.x,0)/ds.length,cy=ds.reduce((a,q)=>a+q.y,0)/ds.length,x=cx-s/2,y=cy-s/2;
+      const zn=(names[d.room]||{})[sid]||d.rn;
+      const tip=items.map(i=>i.name+(i.c!=='key'&&i.c!=='imp'&&i.n>1?' ×'+i.n:'')+(i.pct<100?' · '+i.pct+'%':'')).join('\n');
+      const more=items.length-1,bw=(more>9?19:14)*k,bh=12*k;
+      const e=document.createElementNS(NS,'g');e.setAttribute('class','drop');
+      e.innerHTML=`<title>${esc(zn)}\n${esc(tip)}</title><rect class="hit" x="${(cx-hs/2).toFixed(1)}" y="${(cy-hs/2).toFixed(1)}" width="${hs.toFixed(1)}" height="${hs.toFixed(1)}"/>`+glyphSVG(d.c,dcol(lv,d),x,y,s)+
+        (more?`<g class="nb"><rect x="${(x+s*.72).toFixed(1)}" y="${(y-bh*.45).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="${(2*k).toFixed(1)}" stroke-width="${(1*k).toFixed(2)}"/><text x="${(x+s*.72+bw/2).toFixed(1)}" y="${(y-bh*.45+bh/2).toFixed(1)}" style="font-size:${(10*k).toFixed(2)}px">+${more}</text></g>`:'');
+      e.addEventListener('click',ev=>{ev.stopPropagation();if(!stripClick(zn,d.room))scrollToRoom(roomSlug(zn));});
+      g.appendChild(e);
+    });
+    const ov=svg.querySelector('g.live-en')||svg.querySelector('g.live-ov');   // under the bridge's marks
+    if(ov)svg.insertBefore(g,ov);else svg.appendChild(g);
+  });
+}
+let dropT=0;const dropSoon=()=>{clearTimeout(dropT);dropT=setTimeout(dropDraw,60);};
+window.dropDraw=dropDraw;
+{const f=renderMap;renderMap=function(){const v=f.apply(this,arguments);dropSoon();L3.load();return v;};}
+{const f=setNetMode;setNetMode=function(){const v=f.apply(this,arguments);dropSoon();return v;};}
+{const f=setNetPattern;setNetPattern=function(){const v=f.apply(this,arguments);dropSoon();return v;};}
+{const f=stripPaint;stripPaint=function(){const v=f.apply(this,arguments);L3.focus();return v;};}
+addEventListener('resize',dropSoon);
+if(typeof ResizeObserver==='function'){const ro=new ResizeObserver(dropSoon);
+  new MutationObserver(()=>{const p=document.getElementById('mp-floorplan');if(p&&!p.__dropRO){p.__dropRO=1;ro.observe(p);}}).observe(document.getElementById('lv-map'),{childList:true,subtree:true});}
+
+/* ---------- this level's own 3D model ---------- */
+// The city map's per-level models (rooms: polygons in feet, floor y, height h), drawn the way the
+// city draws them but alone. A picked room lights amber and the camera frames it; the live room
+// lights in player 1's colour and its whole floor lifts.
+const L3=(()=>{
+  const box=document.getElementById('lv-3d'),cv=box.querySelector('.l3-gl'),ov=box.querySelector('.l3-ov'),ctx=ov.getContext('2d');
+  const gl=cv.getContext('webgl',{antialias:true,alpha:false});
+  if(!gl)return {load(){},focus(){}};
+  const sh=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;};
+  const prog=(v,f)=>{const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,v));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,f));gl.linkProgram(p);return p;};
+  const LP=prog(`attribute vec3 p;attribute float b;attribute float r;attribute float fy;
+uniform mat4 mvp;uniform vec3 eye;uniform float far,reveal,sel,live,liveY;uniform vec2 ctr;
+varying float vb;varying float vk;
+void main(){gl_Position=mvp*vec4(p,1.0);float d=length(p-eye);vb=b*clamp(1.35-d/far,.25,1.0);
+ if(length(p.xz-ctr)>reveal)vb=0.0;
+ vk=(r>.5&&abs(r-live)<.5)?3.0:(r>.5&&abs(r-sel)<.5)?2.0:(live>.5&&abs(fy-liveY)<.5)?1.0:0.0;}`,
+  `precision mediump float;varying float vb;varying float vk;
+void main(){vec3 ph=vec3(.235,1.0,.54),am=vec3(.91,.63,0.0),pc=vec3(0.0,.706,.627);
+ vec3 c=vk>2.5?pc*2.2:vk>1.5?am*1.6:vk>.5?ph*1.5:ph;gl_FragColor=vec4(c*vb*.42,1.0);}`);
+  const FP=prog(`attribute vec2 q;void main(){gl_Position=vec4(q,0.0,1.0);}`,`precision mediump float;uniform float a;void main(){gl_FragColor=vec4(.027,.035,.047,a);}`);
+  const U=n=>gl.getUniformLocation(LP,n);
+  const u={mvp:U('mvp'),eye:U('eye'),far:U('far'),rev:U('reveal'),sel:U('sel'),live:U('live'),liveY:U('liveY'),ctr:U('ctr'),a:gl.getUniformLocation(FP,'a')};
+  const A={p:gl.getAttribLocation(LP,'p'),b:gl.getAttribLocation(LP,'b'),r:gl.getAttribLocation(LP,'r'),fy:gl.getAttribLocation(LP,'fy'),q:gl.getAttribLocation(FP,'q')};
+  const mk=(data,loc,size)=>{const bo=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bo);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return {bo,loc,size};};
+  const bind=a=>{gl.bindBuffer(gl.ARRAY_BUFFER,a.bo);gl.enableVertexAttribArray(a.loc);gl.vertexAttribPointer(a.loc,a.size,gl.FLOAT,false,0,0);};
+  const quad=mk(new Float32Array([-1,-1,1,-1,-1,1,1,1]),A.q,2);
+  const HOME_K=1.15,ROOM_K=2.1;      // user 11/06: open close; a picked room is "the room and a little bit extra"
+  let buf=null,N=0,cen=[0,0,0],ext=300,home={x:0,z:0,ext:300},roomCen={},floorOf={},byName={},loaded=null;
+  const cam={yaw:.6,pitch:.6,dist:300,tx:0,ty:0,tz:0,g:{dist:300,tx:0,ty:0,tz:0,pitch:.6}};
+  let W=0,H=0,M=new Float32Array(16),eye=[0,0,0],drag=null,reveal=1e9,boot=0,visible=true,running=false,t0=0;
+  function load(){
+    const lv=curLevel,CM=window.__cityModels;
+    const site=CM&&lv&&CM.sites.find(x=>x.id===lv.id),m=site&&CM.models[site.mc];
+    box.hidden=!m;
+    if(!m){loaded=null;return;}
+    if(loaded===lv.id){focus();wake();return;}
+    loaded=lv.id;byName=lvRooms(lv);
+    box.querySelector('.l3-n').innerHTML=`<em>FILE ${lv.file}</em>${String(site.site).toUpperCase()}`;
+    const P=[],B=[],R=[],F=[];roomCen={};floorOf={};
+    let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9,y0=1e9,y1=-1e9,i0=1e9,i1=-1e9,k0=1e9,k1=-1e9;
+    for(const rm of m.rooms){const no=byName[bare(rm.room)]||0,b=rm.outdoor?.5:rm.y<0?.48:.7;
+      const seg=(ax,ay,az,bx,by,bz,bb)=>{P.push(ax,ay,az,bx,by,bz);B.push(bb,bb);R.push(no,no);F.push(rm.y,rm.y);};
+      let cx=0,cz=0,cn=0;const c=no?(roomCen[no]=roomCen[no]||{x:0,z:0,n:0,y:rm.y+(rm.h||8),x0:1e9,x1:-1e9,z0:1e9,z1:-1e9}):null;
+      for(const q of rm.polys){const n=q.length;
+        for(let i=0;i<n;i++){const a=q[i],e=q[(i+1)%n];cx+=a[0];cz+=a[1];cn++;
+          x0=Math.min(x0,a[0]);x1=Math.max(x1,a[0]);z0=Math.min(z0,a[1]);z1=Math.max(z1,a[1]);y0=Math.min(y0,rm.y);y1=Math.max(y1,rm.y+(rm.h||0));
+          if(!rm.outdoor){i0=Math.min(i0,a[0]);i1=Math.max(i1,a[0]);k0=Math.min(k0,a[1]);k1=Math.max(k1,a[1]);}
+          if(c){c.x0=Math.min(c.x0,a[0]);c.x1=Math.max(c.x1,a[0]);c.z0=Math.min(c.z0,a[1]);c.z1=Math.max(c.z1,a[1]);}
+          seg(a[0],rm.y+.5,a[1],e[0],rm.y+.5,e[1],b);
+          if(rm.h){seg(a[0],rm.y+rm.h,a[1],e[0],rm.y+rm.h,e[1],b);if(i%2===0)seg(a[0],rm.y,a[1],a[0],rm.y+rm.h,a[1],b*.55);}
+          else if(rm.outdoor){seg(a[0],rm.y+7,a[1],e[0],rm.y+7,e[1],b*.55);if(i%2===0)seg(a[0],rm.y,a[1],a[0],rm.y+7,a[1],b*.55);}}}
+      if(c&&cn){c.x+=cx;c.z+=cz;c.n+=cn;if(!(no in floorOf))floorOf[no]=rm.y;}}
+    for(const c of Object.values(roomCen)){c.x/=c.n;c.z/=c.n;c.ext=Math.max(c.x1-c.x0,c.z1-c.z0,20);}
+    if(buf)for(const k of ['p','b','r','fy'])gl.deleteBuffer(buf[k].bo);
+    buf={p:mk(new Float32Array(P),A.p,3),b:mk(new Float32Array(B),A.b,1),r:mk(new Float32Array(R),A.r,1),fy:mk(new Float32Array(F),A.fy,1)};N=P.length/3;
+    cen=[(x0+x1)/2,(y0+y1)/2,(z0+z1)/2];ext=Math.max(x1-x0,z1-z0,60);
+    home=i1>i0?{x:(i0+i1)/2,z:(k0+k1)/2,ext:Math.max(i1-i0,k1-k0,60)}:{x:cen[0],z:cen[2],ext:ext};   // open on the buildings
+    Object.assign(cam,{tx:home.x,ty:cen[1],tz:home.z,dist:ext*2,pitch:1.15});reveal=0;boot=performance.now();
+    focus();wake();
+  }
+  const selNo=()=>{if(stripPick&&curLevel&&stripPick.lvl===curLevel.id)return stripPick.no!=null?+stripPick.no:byName[bare(stripPick.name)]||0;return 0;};
+  const liveNo=()=>stripLive&&stripLive.room!=null?+stripLive.room:0;
+  function focus(){
+    if(!loaded)return;
+    const no=selNo()||liveNo(),c=no&&roomCen[no];
+    if(c)Object.assign(cam.g,{tx:c.x,ty:c.y,tz:c.z,dist:Math.max(45,c.ext*ROOM_K),pitch:.75});
+    else Object.assign(cam.g,{tx:home.x,ty:cen[1],tz:home.z,dist:home.ext*HOME_K,pitch:.6});
+  }
+  function resize(){const r=box.getBoundingClientRect();if(!r.width)return;const dpr=Math.min(2,devicePixelRatio||1);W=r.width;H=r.height;
+    for(const c of [cv,ov]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}ctx.setTransform(dpr,0,0,dpr,0,0);gl.viewport(0,0,cv.width,cv.height);}
+  addEventListener('resize',()=>{W=0;});
+  function matrices(){
+    const cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
+    eye=[cam.tx+cam.dist*cp*Math.sin(cam.yaw),cam.ty+cam.dist*sp,cam.tz+cam.dist*cp*Math.cos(cam.yaw)];
+    let f=[cam.tx-eye[0],cam.ty-eye[1],cam.tz-eye[2]];let l=Math.hypot(...f);f=f.map(v=>v/l);
+    let s=[-f[2],0,f[0]];l=Math.hypot(...s);s=s.map(v=>v/l);
+    const up=[s[1]*f[2]-s[2]*f[1],s[2]*f[0]-s[0]*f[2],s[0]*f[1]-s[1]*f[0]];
+    const V=[s[0],up[0],-f[0],0,s[1],up[1],-f[1],0,s[2],up[2],-f[2],0,-(s[0]*eye[0]+s[1]*eye[1]+s[2]*eye[2]),-(up[0]*eye[0]+up[1]*eye[1]+up[2]*eye[2]),f[0]*eye[0]+f[1]*eye[1]+f[2]*eye[2],1];
+    const near=cam.dist*.01,far=cam.dist*6,fy=1/Math.tan(.36),asp=W/H;
+    const Pm=[fy/asp,0,0,0,0,fy,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0];
+    for(let c=0;c<4;c++)for(let r=0;r<4;r++){let v=0;for(let k=0;k<4;k++)v+=Pm[k*4+r]*V[c*4+k];M[c*4+r]=v;}
+  }
+  function project(x,y,z){const X=M[0]*x+M[4]*y+M[8]*z+M[12],Y=M[1]*x+M[5]*y+M[9]*z+M[13],Wc=M[3]*x+M[7]*y+M[11]*z+M[15];if(Wc<=0)return null;return [(X/Wc*.5+.5)*W,(1-(Y/Wc*.5+.5))*H];}
+  box.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY];box.setPointerCapture(e.pointerId);box.classList.add('drag');});
+  box.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag[0],dy=e.clientY-drag[1];drag=[e.clientX,e.clientY];cam.yaw-=dx*.006;cam.g.pitch=Math.max(.1,Math.min(1.45,cam.g.pitch+dy*.005));});
+  const end=()=>{drag=null;box.classList.remove('drag');};box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
+  box.addEventListener('wheel',e=>{e.preventDefault();cam.g.dist=Math.max(30,Math.min(ext*3,cam.g.dist*(1+Math.sign(e.deltaY)*.12)));},{passive:false});
+  // sleeps off screen, in a hidden tab and off the level page (stream PCs run the game beside this)
+  if('IntersectionObserver' in window)new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible)wake();}).observe(box);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake();});
+  const view=document.getElementById('lvview');
+  function frame(now){
+    if(!visible||document.hidden||box.hidden||!view.classList.contains('on')||!box.offsetWidth){running=false;return;}
+    const dt=Math.min(.05,(now-t0)/1000);t0=now;if(!W)resize();
+    if(reveal<1e9){reveal=(now-boot)*ext/900;if(reveal>ext*1.5)reveal=1e9;}
+    if(!drag)cam.yaw+=dt*.12;
+    const k=1-Math.pow(.04,dt);for(const p of ['dist','tx','ty','tz','pitch'])cam[p]+=(cam.g[p]-cam[p])*k;
+    matrices();
+    gl.disable(gl.DEPTH_TEST);gl.enable(gl.BLEND);
+    gl.useProgram(FP);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1f(u.a,.5);bind(quad);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);gl.disableVertexAttribArray(quad.loc);
+    gl.useProgram(LP);gl.blendFunc(gl.ONE,gl.ONE);
+    const lr=liveNo(),sel=selNo();
+    gl.uniformMatrix4fv(u.mvp,false,M);gl.uniform3fv(u.eye,eye);gl.uniform1f(u.far,cam.dist*2.4);gl.uniform1f(u.rev,reveal);gl.uniform2f(u.ctr,cen[0],cen[2]);
+    gl.uniform1f(u.sel,sel);gl.uniform1f(u.live,lr);gl.uniform1f(u.liveY,lr&&lr in floorOf?floorOf[lr]:-9999);
+    if(buf){bind(buf.p);bind(buf.b);bind(buf.r);bind(buf.fy);gl.drawArrays(gl.LINES,0,N);}
+    ctx.clearRect(0,0,W,H);ctx.textBaseline='middle';ctx.font="700 10px 'JetBrains Mono',monospace";
+    const t=MAP_LAYERS[curLevel.id],nm=no=>(t&&t.rooms[no]?t.rooms[no].n:'ROOM '+no).toUpperCase();
+    const tag=(no,col)=>{const c=roomCen[no];if(!c)return;const p=project(c.x,c.y+6,c.z);if(!p)return;const s=nm(no),tw=ctx.measureText(s).width+10,ly=p[1]-22;
+      ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(p[0],ly);ctx.lineTo(p[0]+8,ly);ctx.stroke();
+      ctx.fillStyle='rgba(7,9,12,.85)';ctx.fillRect(p[0]+8,ly-8,tw,16);ctx.strokeRect(p[0]+8.5,ly-7.5,tw-1,15);ctx.fillStyle=col;ctx.fillText(s,p[0]+13,ly);};
+    if(sel&&sel!==lr)tag(sel,'rgba(232,160,0,.95)');if(lr)tag(lr,'rgba(0,180,160,1)');
+    const deg=((-cam.yaw*180/Math.PI)%360+360)%360;
+    box.querySelector('.l3-hud').textContent=`BRG ${deg.toFixed(0).padStart(3,'0')}° · ELV ${(cam.pitch*180/Math.PI).toFixed(0)}° · ${Math.round(cam.dist)} FT`;
+    box.querySelector('.l3-live').innerHTML=lr&&lr in floorOf?`<b>◉ ${floorOf[lr]<0?'BELOW GROUND':floorOf[lr]===0?'GROUND':'+'+floorOf[lr]+' FT'}</b>`:'';
+    requestAnimationFrame(frame);
+  }
+  function wake(){if(running||box.hidden)return;running=true;t0=performance.now();W=0;requestAnimationFrame(frame);}
+  return {load,focus,wake};
+})();
+window.__lv3d=L3;
+if(curLevel){L3.load();dropSoon();}
+})();
+</script>
+
 <div id="dt-blueprint-svgs" style="display:none">
   <div class="bp-floor-wrap">
 <svg xmlns="http://www.w3.org/2000/svg"
