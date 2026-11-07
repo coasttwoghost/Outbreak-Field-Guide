@@ -1498,7 +1498,9 @@ class Recorder:
                "roster": self._pack(self.ram.read(L["roster"], count * 0x60)) if count else None,
                "masters": self._pack(self.ram.read(L["master"], 0x100)),
                "entities": snap.get("entities"), "doors": snap.get("doors"), "bossDoor": snap.get("bossDoor"),
-               "killedzombies": game.get("killedzombies"), "fighttime2": game.get("fighttime2")}
+               "killedzombies": game.get("killedzombies"), "fighttime2": game.get("fighttime2"),
+               # Desperate Times' gas: without these a replay cannot tint the map
+               "gasflag": game.get("gasflag"), "gasrandom": game.get("gasrandom")}
         if game.get("currentFile") == 2:
             base, n, size = VirusEstimator.POOL
             row["pool"] = self._pack(self.ram.read(base, n * size))
@@ -1728,10 +1730,13 @@ class RecReplay:
         self.polls = 0
         self.t0 = time.time()
         self.lines, self.times = [], []
+        gas = GasBackfill.for_rec(path)
         with gzip.open(path, "rt", encoding="utf-8") as f:
             try:
                 for line in f:
                     r = json.loads(line)
+                    if gas and r.get("gasflag") is None:
+                        r["gasflag"], r["gasrandom"] = gas.at(r["t"])
                     self.times.append(r["t"])
                     self.lines.append(json.dumps(self._snap(r), separators=(",", ":")).encode("utf-8"))
             except (EOFError, OSError, json.JSONDecodeError):
@@ -1740,6 +1745,8 @@ class RecReplay:
             raise SystemExit(f"replay: nothing readable in {path}")
         self.span = max(1.0, self.times[-1] - self.times[0])
         self.note = f"{len(self.lines)} samples, {self.span / 60:.1f} min"
+        if gas:
+            self.note += f", gas from {gas.source}"
         pos = path.with_name(path.name.replace("rec-", "pos-", 1))
         self.fast = PosReplay(pos, self.at) if pos.is_file() else None
         if self.fast:
@@ -1772,7 +1779,8 @@ class RecReplay:
         snap = {"state": "in-game", "replay": True,
                 "game": {"currentFile": file, "scenario": r.get("scenario"),
                          "difficulty": r.get("difficulty"), "frames": r.get("frames"),
-                         "killedzombies": r.get("killedzombies"), "fighttime2": r.get("fighttime2")},
+                         "killedzombies": r.get("killedzombies"), "fighttime2": r.get("fighttime2"),
+                         "gasflag": r.get("gasflag"), "gasrandom": r.get("gasrandom")},
                 "players": players, "items": [], "roomItems": [], "doors": r.get("doors"), "bossDoor": r.get("bossDoor"),
                 "enemies": [dict(slot=s, nameID=n, HP=hp, maxHP=cls._max_hp(roster, s, hp), roomID=room)
                             for s, n, hp, room in r.get("enemies") or []]}
@@ -1808,6 +1816,66 @@ class RecReplay:
         if self.fast:
             d["fast"] = True
         return d
+
+
+class GasBackfill:
+    """The Desperate Times gas for a recording made before rec lines carried it.
+
+    Rec lines gained `gasflag` and `gasrandom` on 2026-11-07. Older Desperate
+    Times recordings have neither, so a replay of one could never tint the map.
+    The watcher (watch_run.py) logged both from /live.json, and on run nights it
+    ran beside the recorder, so its snap file holds the real values for the same
+    wall-clock seconds. This reads that timeline and answers by time. Nothing is
+    guessed: a second the watcher did not see in Desperate Times gets None.
+    """
+
+    def __init__(self, times: list, vals: list, source: str):
+        self.times, self.vals, self.source = times, vals, source
+
+    def at(self, t: float):
+        i = bisect.bisect_right(self.times, t) - 1
+        if i < 0 or t - self.times[i] > 5.0:        # a gap in the watcher's view
+            return None, None
+        return self.vals[i]
+
+    @classmethod
+    def for_rec(cls, rec: Path) -> "GasBackfill | None":
+        try:
+            with gzip.open(rec, "rt", encoding="utf-8") as f:
+                first = json.loads(f.readline())
+        except (OSError, EOFError, json.JSONDecodeError):
+            return None
+        if "gasflag" in first or "desperate" not in str(first.get("scenario") or ""):
+            return None
+        t0 = first.get("t") or 0
+        for snap in sorted(rec.parent.glob("watch-*.snap.jsonl.gz"), reverse=True):
+            if snap.name[6:21] > rec.name[4:19]:    # started after this run did
+                continue
+            got = cls._read(snap, t0)
+            if got:
+                return got
+        return None
+
+    @classmethod
+    def _read(cls, snap: Path, t0: float) -> "GasBackfill | None":
+        game, times, vals = {}, [], []
+        try:
+            with gzip.open(snap, "rt", encoding="utf-8") as f:
+                for line in f:
+                    j = json.loads(line)
+                    if isinstance(j.get("game"), dict):
+                        game.update(j["game"])      # the watcher writes game as deltas
+                    t = j.get("t")
+                    if t is None or t < t0 - 60:
+                        continue
+                    if "desperate" in str(game.get("scenario") or "") and j.get("state") == "in-game":
+                        times.append(t)
+                        vals.append((game.get("gasflag"), game.get("gasrandom")))
+        except (OSError, EOFError, json.JSONDecodeError):
+            pass                                    # a watcher killed mid-line
+        if not times or times[0] > t0 + 600:
+            return None
+        return cls(times, vals, snap.name)
 
 
 class PosReplay:
